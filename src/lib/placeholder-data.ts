@@ -153,7 +153,7 @@ export const getHost = (id: string) => hosts.find((h) => h.id === id) ?? hosts[0
 export const eventsByHost = (id: string) => events.filter((e) => e.hostId === id);
 
 export const formatDate = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, {
+  new Date(iso).toLocaleString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
