@@ -9,38 +9,225 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TicketsRouteImport } from './routes/tickets'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as MyEventsRouteImport } from './routes/my-events'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HostsIdRouteImport } from './routes/hosts.$id'
+import { Route as EventsNewRouteImport } from './routes/events.new'
+import { Route as EventsIdRouteImport } from './routes/events.$id'
+import { Route as EventsIdEditRouteImport } from './routes/events.$id.edit'
+import { Route as EventsIdCheckinRouteImport } from './routes/events.$id.checkin'
 
+const TicketsRoute = TicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyEventsRoute = MyEventsRouteImport.update({
+  id: '/my-events',
+  path: '/my-events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HostsIdRoute = HostsIdRouteImport.update({
+  id: '/hosts/$id',
+  path: '/hosts/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsNewRoute = EventsNewRouteImport.update({
+  id: '/events/new',
+  path: '/events/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIdRoute = EventsIdRouteImport.update({
+  id: '/events/$id',
+  path: '/events/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIdEditRoute = EventsIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => EventsIdRoute,
+} as any)
+const EventsIdCheckinRoute = EventsIdCheckinRouteImport.update({
+  id: '/checkin',
+  path: '/checkin',
+  getParentRoute: () => EventsIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/explore': typeof ExploreRoute
+  '/login': typeof LoginRoute
+  '/my-events': typeof MyEventsRoute
+  '/register': typeof RegisterRoute
+  '/tickets': typeof TicketsRoute
+  '/events/$id': typeof EventsIdRouteWithChildren
+  '/events/new': typeof EventsNewRoute
+  '/hosts/$id': typeof HostsIdRoute
+  '/events/$id/checkin': typeof EventsIdCheckinRoute
+  '/events/$id/edit': typeof EventsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/explore': typeof ExploreRoute
+  '/login': typeof LoginRoute
+  '/my-events': typeof MyEventsRoute
+  '/register': typeof RegisterRoute
+  '/tickets': typeof TicketsRoute
+  '/events/$id': typeof EventsIdRouteWithChildren
+  '/events/new': typeof EventsNewRoute
+  '/hosts/$id': typeof HostsIdRoute
+  '/events/$id/checkin': typeof EventsIdCheckinRoute
+  '/events/$id/edit': typeof EventsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
+  '/explore': typeof ExploreRoute
+  '/login': typeof LoginRoute
+  '/my-events': typeof MyEventsRoute
+  '/register': typeof RegisterRoute
+  '/tickets': typeof TicketsRoute
+  '/events/$id': typeof EventsIdRouteWithChildren
+  '/events/new': typeof EventsNewRoute
+  '/hosts/$id': typeof HostsIdRoute
+  '/events/$id/checkin': typeof EventsIdCheckinRoute
+  '/events/$id/edit': typeof EventsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/explore'
+    | '/login'
+    | '/my-events'
+    | '/register'
+    | '/tickets'
+    | '/events/$id'
+    | '/events/new'
+    | '/hosts/$id'
+    | '/events/$id/checkin'
+    | '/events/$id/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/explore'
+    | '/login'
+    | '/my-events'
+    | '/register'
+    | '/tickets'
+    | '/events/$id'
+    | '/events/new'
+    | '/hosts/$id'
+    | '/events/$id/checkin'
+    | '/events/$id/edit'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/explore'
+    | '/login'
+    | '/my-events'
+    | '/register'
+    | '/tickets'
+    | '/events/$id'
+    | '/events/new'
+    | '/hosts/$id'
+    | '/events/$id/checkin'
+    | '/events/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
+  ExploreRoute: typeof ExploreRoute
+  LoginRoute: typeof LoginRoute
+  MyEventsRoute: typeof MyEventsRoute
+  RegisterRoute: typeof RegisterRoute
+  TicketsRoute: typeof TicketsRoute
+  EventsIdRoute: typeof EventsIdRouteWithChildren
+  EventsNewRoute: typeof EventsNewRoute
+  HostsIdRoute: typeof HostsIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tickets': {
+      id: '/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof TicketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-events': {
+      id: '/my-events'
+      path: '/my-events'
+      fullPath: '/my-events'
+      preLoaderRoute: typeof MyEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +235,79 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/hosts/$id': {
+      id: '/hosts/$id'
+      path: '/hosts/$id'
+      fullPath: '/hosts/$id'
+      preLoaderRoute: typeof HostsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/new': {
+      id: '/events/new'
+      path: '/events/new'
+      fullPath: '/events/new'
+      preLoaderRoute: typeof EventsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$id': {
+      id: '/events/$id'
+      path: '/events/$id'
+      fullPath: '/events/$id'
+      preLoaderRoute: typeof EventsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$id/edit': {
+      id: '/events/$id/edit'
+      path: '/edit'
+      fullPath: '/events/$id/edit'
+      preLoaderRoute: typeof EventsIdEditRouteImport
+      parentRoute: typeof EventsIdRoute
+    }
+    '/events/$id/checkin': {
+      id: '/events/$id/checkin'
+      path: '/checkin'
+      fullPath: '/events/$id/checkin'
+      preLoaderRoute: typeof EventsIdCheckinRouteImport
+      parentRoute: typeof EventsIdRoute
+    }
   }
 }
 
+interface EventsIdRouteChildren {
+  EventsIdCheckinRoute: typeof EventsIdCheckinRoute
+  EventsIdEditRoute: typeof EventsIdEditRoute
+}
+
+const EventsIdRouteChildren: EventsIdRouteChildren = {
+  EventsIdCheckinRoute: EventsIdCheckinRoute,
+  EventsIdEditRoute: EventsIdEditRoute,
+}
+
+const EventsIdRouteWithChildren = EventsIdRoute._addFileChildren(
+  EventsIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
+  ExploreRoute: ExploreRoute,
+  LoginRoute: LoginRoute,
+  MyEventsRoute: MyEventsRoute,
+  RegisterRoute: RegisterRoute,
+  TicketsRoute: TicketsRoute,
+  EventsIdRoute: EventsIdRouteWithChildren,
+  EventsNewRoute: EventsNewRoute,
+  HostsIdRoute: HostsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
