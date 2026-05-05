@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -7,11 +8,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { isLoggedIn } from "@/lib/placeholder-data";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Menu, Plus } from "lucide-react";
+
+const navLinks = [
+  { to: "/explore", label: "Explore" },
+  { to: "/my-events", label: "My Events" },
+  { to: "/tickets", label: "My Tickets" },
+] as const;
 
 function Navbar() {
+  const [open, setOpen] = useState(false);
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -20,23 +35,40 @@ function Navbar() {
           <span>EventPass</span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
-          <Link to="/explore" activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
-            Explore
-          </Link>
-          <Link to="/my-events" activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
-            My Events
-          </Link>
-          <Link to="/tickets" activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
-            My Tickets
-          </Link>
+          {navLinks.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              activeProps={{ className: "text-foreground font-medium" }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              {l.label}
+            </Link>
+          ))}
+          {isLoggedIn && (
+            <Link
+              to="/dashboard"
+              activeProps={{ className: "text-foreground font-medium" }}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              Dashboard
+            </Link>
+          )}
         </nav>
         <div className="flex items-center gap-2">
+          {isLoggedIn && (
+            <Button size="sm" asChild className="hidden sm:inline-flex">
+              <Link to="/events/new">
+                <Plus className="h-4 w-4 mr-1" /> Create Event
+              </Link>
+            </Button>
+          )}
           {!isLoggedIn ? (
             <>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
                 <Link to="/login">Login</Link>
               </Button>
-              <Button size="sm" asChild>
+              <Button size="sm" asChild className="hidden md:inline-flex">
                 <Link to="/register">Register</Link>
               </Button>
             </>
@@ -58,6 +90,42 @@ function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+              <nav className="flex flex-col gap-1 mt-6 px-4">
+                {navLinks.map((l) => (
+                  <Link
+                    key={l.to}
+                    to={l.to}
+                    onClick={() => setOpen(false)}
+                    className="py-2 text-sm hover:text-primary"
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+                {isLoggedIn ? (
+                  <>
+                    <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Dashboard</Link>
+                    <Link to="/events/new" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Create Event</Link>
+                    <button className="py-2 text-sm text-left hover:text-primary">Logout</button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Login</Link>
+                    <Link to="/register" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Register</Link>
+                  </>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
@@ -71,7 +139,7 @@ function Footer() {
         <p>© 2025 EventPass</p>
         <div className="flex gap-6">
           <Link to="/explore" className="hover:text-foreground">Explore</Link>
-          <a href="#" className="hover:text-foreground">About</a>
+          <Link to="/about" className="hover:text-foreground">About</Link>
         </div>
       </div>
     </footer>
