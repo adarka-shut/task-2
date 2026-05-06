@@ -38,26 +38,26 @@ function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
+    <header className="sticky top-0 z-40 w-full border-b border-secondary/40 bg-secondary text-secondary-foreground">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-semibold">
+        <Link to="/" className="flex items-center gap-2 font-semibold text-secondary-foreground">
           <CalendarDays className="h-5 w-5 text-primary" />
           <span>EventPass</span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
           {navLinks.map((l) => (
-            <Link key={l.to} to={l.to} activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
+            <Link key={l.to} to={l.to} activeProps={{ className: "text-primary font-semibold" }} className="text-secondary-foreground/80 hover:text-primary">
               {l.label}
             </Link>
           ))}
           {isLoggedIn && (
             <>
               {authedLinks.map((l) => (
-                <Link key={l.to} to={l.to} activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
+                <Link key={l.to} to={l.to} activeProps={{ className: "text-primary font-semibold" }} className="text-secondary-foreground/80 hover:text-primary">
                   {l.label}
                 </Link>
               ))}
-              <Link to="/dashboard" activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
+              <Link to="/dashboard" activeProps={{ className: "text-primary font-semibold" }} className="text-secondary-foreground/80 hover:text-primary">
                 Dashboard
               </Link>
             </>
@@ -73,7 +73,7 @@ function Navbar() {
           )}
           {!isLoggedIn ? (
             <>
-              <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+              <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex text-secondary-foreground hover:bg-secondary/70 hover:text-primary">
                 <Link to="/login">Login</Link>
               </Button>
               <Button size="sm" asChild className="hidden md:inline-flex">
@@ -83,7 +83,7 @@ function Navbar() {
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="ghost" size="icon" className="rounded-full text-secondary-foreground hover:bg-secondary/70">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>{initial}</AvatarFallback>
                   </Avatar>
@@ -100,7 +100,7 @@ function Navbar() {
           )}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+              <Button variant="ghost" size="icon" className="md:hidden text-secondary-foreground hover:bg-secondary/70" aria-label="Open menu">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -133,12 +133,12 @@ function Navbar() {
 
 function Footer() {
   return (
-    <footer className="border-t mt-16">
-      <div className="container mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+    <footer className="border-t border-secondary/40 mt-16 bg-secondary text-secondary-foreground">
+      <div className="container mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
         <p>© 2025 EventPass</p>
         <div className="flex gap-6">
-          <Link to="/explore" className="hover:text-foreground">Explore</Link>
-          <Link to="/about" className="hover:text-foreground">About</Link>
+          <Link to="/explore" className="hover:text-primary">Explore</Link>
+          <Link to="/about" className="hover:text-primary">About</Link>
         </div>
       </div>
     </footer>
