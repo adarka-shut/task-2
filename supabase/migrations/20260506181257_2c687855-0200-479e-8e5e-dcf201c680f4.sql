@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS events_select_published_public ON public.events;
+CREATE POLICY events_select_any_published ON public.events FOR SELECT USING (status = 'published' OR is_host_member(host_id, auth.uid(), NULL::text));
