@@ -61,13 +61,13 @@ function Navbar() {
                 </Link>
               ))}
               <Link to="/dashboard" activeProps={{ className: "text-primary font-semibold" }} className="text-secondary-foreground/80 hover:text-primary">
-                Dashboard
+                {dashboardLabel}
               </Link>
             </>
           )}
         </nav>
         <div className="flex items-center gap-2">
-          {isLoggedIn && (
+          {isLoggedIn && isHost && (
             <Button size="sm" asChild className="hidden sm:inline-flex">
               <Link to="/events/new">
                 <Plus className="h-4 w-4 mr-1" /> Create Event
