@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
+import { useRoles } from "@/lib/use-roles";
 import { CalendarDays, Menu, Plus } from "lucide-react";
 
 const navLinks = [{ to: "/explore", label: "Explore" }] as const;
