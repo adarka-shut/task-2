@@ -63,22 +63,24 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
 
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("File too large (max 5MB)"); return; }
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast.error("File too large (max 2MB for inline images)"); return; }
     setUploading(true);
     try {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("covers").upload(path, file, { upsert: false, contentType: file.type, cacheControl: "3600" });
-      if (error) throw error;
-      const { data } = supabase.storage.from("covers").getPublicUrl(path);
-      setCoverUrl(data.publicUrl);
-      toast.success("Cover uploaded");
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      setCoverUrl(dataUrl);
+      toast.success("Cover loaded");
     } catch (err: any) {
-      console.error("Cover upload failed", err);
-      toast.error(`Upload failed: ${err?.message ?? err?.error ?? "Unknown error"}`);
+      console.error("Cover load failed", JSON.stringify(err, null, 2), err);
+      toast.error(`Load failed: ${err?.message ?? "Unknown error"}`);
     } finally {
       setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
