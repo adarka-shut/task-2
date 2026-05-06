@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { useRoles } from "@/lib/use-roles";
 import { Plus, Copy } from "lucide-react";
 import { downloadCsv } from "@/lib/calendar";
 import { toast } from "sonner";
