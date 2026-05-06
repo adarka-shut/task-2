@@ -60,6 +60,7 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
       setIsOnline(data.is_online);
       setLocation(data.is_online ? (data.online_link ?? "") : (data.venue_address ?? ""));
       setCapacity(data.capacity);
+      setVisibility((data.visibility as "public" | "unlisted") ?? "public");
       setCoverUrl(data.cover_image_url);
     });
   }, [mode, eventId]);
