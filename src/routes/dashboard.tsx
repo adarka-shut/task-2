@@ -173,23 +173,23 @@ function InvitePanel({ hostIds }: { hostIds: string[] }) {
 
 function Dashboard() {
   const { user } = useAuth();
-  const { isHost, isCheckerOnly, hostIds: hostHostIds, checkerHostIds, loading: rolesLoading } = useRoles();
-  const [events, setEvents] = useState<Ev[]>([]);
+  const { isHost, hostIds: hostHostIds, checkerHostIds, loading: rolesLoading } = useRoles();
+  const [events, setEvents] = useState<(Ev & { host_id: string })[]>([]);
 
-  // Events scope: hosts see events from hosts they manage; checkers see events from hosts they check for.
-  const accessibleHostIds = isHost ? hostHostIds : checkerHostIds;
+  const accessibleHostIds = [...new Set([...hostHostIds, ...checkerHostIds])];
+  const hostHostIdSet = new Set(hostHostIds);
 
   useEffect(() => {
     if (!user || rolesLoading) return;
     (async () => {
       if (accessibleHostIds.length === 0) { setEvents([]); return; }
-      const { data: evs } = await supabase.from("events").select("id,title,end_time,capacity").in("host_id", accessibleHostIds).order("start_time", { ascending: false });
+      const { data: evs } = await supabase.from("events").select("id,title,end_time,capacity,host_id").in("host_id", accessibleHostIds).order("start_time", { ascending: false });
       const list = evs ?? [];
-      const counts = isHost
-        ? await Promise.all(list.map((e) =>
-            supabase.from("rsvps").select("*", { count: "exact", head: true }).eq("event_id", e.id).eq("status", "confirmed").then((r) => r.count ?? 0)
-          ))
-        : list.map(() => 0);
+      const counts = await Promise.all(list.map((e) =>
+        hostHostIdSet.has(e.host_id)
+          ? supabase.from("rsvps").select("*", { count: "exact", head: true }).eq("event_id", e.id).eq("status", "confirmed").then((r) => r.count ?? 0)
+          : Promise.resolve(0)
+      ));
       setEvents(list.map((e, i) => ({ ...e, going: counts[i] })));
     })();
   }, [user, rolesLoading, accessibleHostIds.join(",")]);
@@ -202,54 +202,52 @@ function Dashboard() {
     return <SiteLayout><div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading…</div></SiteLayout>;
   }
 
-  // Checker-only restricted view
-  if (isCheckerOnly) {
-    return (
-      <SiteLayout>
-        <div className="container mx-auto px-4 py-10">
-          <h1 className="text-3xl font-bold mb-2">Check-in</h1>
-          <p className="text-muted-foreground mb-6">Select an event to check in attendees.</p>
-          <div className="space-y-3">
-            {upcoming.length === 0 && past.length === 0 ? (
-              <p className="text-muted-foreground py-6">No events assigned.</p>
-            ) : (
-              [...upcoming, ...past].map((e) => <Row key={e.id} e={e} isHost={false} />)
-            )}
-          </div>
-        </div>
-      </SiteLayout>
-    );
-  }
+  const renderRow = (e: Ev & { host_id: string }) => (
+    <Row key={e.id} e={e} isHost={hostHostIdSet.has(e.host_id)} />
+  );
 
   return (
     <SiteLayout>
       <div className="container mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">Host dashboard</h1>
-          <div className="flex gap-2">
-            <Button asChild><Link to="/events/new"><Plus className="h-4 w-4 mr-2" />Create Event</Link></Button>
-          </div>
+          <h1 className="text-3xl font-bold">{isHost ? "Host dashboard" : "Check-in"}</h1>
+          {isHost && (
+            <div className="flex gap-2">
+              <Button asChild><Link to="/events/new"><Plus className="h-4 w-4 mr-2" />Create Event</Link></Button>
+            </div>
+          )}
         </div>
-        <Tabs defaultValue="upcoming">
-          <TabsList>
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="past">Past</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="invites">Invites</TabsTrigger>
-          </TabsList>
-          <TabsContent value="upcoming" className="space-y-3 mt-4">
-            {upcoming.length === 0 ? <p className="text-muted-foreground py-6">No upcoming events. <Link to="/events/new" className="text-foreground font-medium underline hover:no-underline">Create one</Link>.</p> : upcoming.map((e) => <Row key={e.id} e={e} isHost={true} />)}
-          </TabsContent>
-          <TabsContent value="past" className="space-y-3 mt-4">
-            {past.length === 0 ? <p className="text-muted-foreground py-6">No past events.</p> : past.map((e) => <Row key={e.id} e={e} isHost={true} />)}
-          </TabsContent>
-          <TabsContent value="reports" className="mt-4">
-            <ReportsPanel hostIds={hostHostIds} />
-          </TabsContent>
-          <TabsContent value="invites" className="mt-4">
-            <InvitePanel hostIds={hostHostIds} />
-          </TabsContent>
-        </Tabs>
+        {!isHost ? (
+          <div className="space-y-3">
+            <p className="text-muted-foreground mb-4">Select an event to check in attendees.</p>
+            {events.length === 0 ? (
+              <p className="text-muted-foreground py-6">No events assigned.</p>
+            ) : (
+              [...upcoming, ...past].map(renderRow)
+            )}
+          </div>
+        ) : (
+          <Tabs defaultValue="upcoming">
+            <TabsList>
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="past">Past</TabsTrigger>
+              <TabsTrigger value="reports">Reports</TabsTrigger>
+              <TabsTrigger value="invites">Invites</TabsTrigger>
+            </TabsList>
+            <TabsContent value="upcoming" className="space-y-3 mt-4">
+              {upcoming.length === 0 ? <p className="text-muted-foreground py-6">No upcoming events. <Link to="/events/new" className="text-foreground font-medium underline hover:no-underline">Create one</Link>.</p> : upcoming.map(renderRow)}
+            </TabsContent>
+            <TabsContent value="past" className="space-y-3 mt-4">
+              {past.length === 0 ? <p className="text-muted-foreground py-6">No past events.</p> : past.map(renderRow)}
+            </TabsContent>
+            <TabsContent value="reports" className="mt-4">
+              <ReportsPanel hostIds={hostHostIds} />
+            </TabsContent>
+            <TabsContent value="invites" className="mt-4">
+              <InvitePanel hostIds={hostHostIds} />
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </SiteLayout>
   );
