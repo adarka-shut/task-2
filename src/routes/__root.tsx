@@ -32,14 +32,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "EventPass" },
+      { name: "description", content: "Community event platform for tech meetups, hackathons and workshops. Browse events, RSVP, get digital tickets, and manage attendance." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "EventPass" },
+      { property: "og:description", content: "Community event platform for tech meetups, hackathons and workshops. Browse events, RSVP, get digital tickets, and manage attendance." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "EventPass" },
+      { name: "twitter:description", content: "Community event platform for tech meetups, hackathons and workshops. Browse events, RSVP, get digital tickets, and manage attendance." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/MPicOnF9ECWNvYHwu3RSKpf16242/social-images/social-1778089776557-eventpass-social.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/MPicOnF9ECWNvYHwu3RSKpf16242/social-images/social-1778089776557-eventpass-social.webp" },
     ],
     links: [
       {
