@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,17 +16,27 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { isLoggedIn } from "@/lib/placeholder-data";
+import { useAuth } from "@/lib/auth";
 import { CalendarDays, Menu, Plus } from "lucide-react";
 
-const navLinks = [
-  { to: "/explore", label: "Explore" },
+const navLinks = [{ to: "/explore", label: "Explore" }] as const;
+const authedLinks = [
   { to: "/my-events", label: "My Events" },
   { to: "/tickets", label: "My Tickets" },
 ] as const;
 
 function Navbar() {
   const [open, setOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const isLoggedIn = !!user;
+  const initial = (user?.user_metadata?.name || user?.email || "U").charAt(0).toUpperCase();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate({ to: "/" });
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -36,23 +46,21 @@ function Navbar() {
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
           {navLinks.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              activeProps={{ className: "text-foreground font-medium" }}
-              className="text-muted-foreground hover:text-foreground"
-            >
+            <Link key={l.to} to={l.to} activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
               {l.label}
             </Link>
           ))}
           {isLoggedIn && (
-            <Link
-              to="/dashboard"
-              activeProps={{ className: "text-foreground font-medium" }}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Dashboard
-            </Link>
+            <>
+              {authedLinks.map((l) => (
+                <Link key={l.to} to={l.to} activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
+                  {l.label}
+                </Link>
+              ))}
+              <Link to="/dashboard" activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
+                Dashboard
+              </Link>
+            </>
           )}
         </nav>
         <div className="flex items-center gap-2">
@@ -77,7 +85,7 @@ function Navbar() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback>U</AvatarFallback>
+                    <AvatarFallback>{initial}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -86,7 +94,7 @@ function Navbar() {
                 <DropdownMenuItem asChild><Link to="/tickets">My Tickets</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/my-events">My Events</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -97,25 +105,16 @@ function Navbar() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
-              <SheetHeader>
-                <SheetTitle>Menu</SheetTitle>
-              </SheetHeader>
+              <SheetHeader><SheetTitle>Menu</SheetTitle></SheetHeader>
               <nav className="flex flex-col gap-1 mt-6 px-4">
-                {navLinks.map((l) => (
-                  <Link
-                    key={l.to}
-                    to={l.to}
-                    onClick={() => setOpen(false)}
-                    className="py-2 text-sm hover:text-primary"
-                  >
-                    {l.label}
-                  </Link>
-                ))}
+                <Link to="/explore" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Explore</Link>
                 {isLoggedIn ? (
                   <>
+                    <Link to="/my-events" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Events</Link>
+                    <Link to="/tickets" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Tickets</Link>
                     <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Dashboard</Link>
                     <Link to="/events/new" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Create Event</Link>
-                    <button className="py-2 text-sm text-left hover:text-primary">Logout</button>
+                    <button onClick={() => { setOpen(false); handleLogout(); }} className="py-2 text-sm text-left hover:text-primary">Logout</button>
                   </>
                 ) : (
                   <>
