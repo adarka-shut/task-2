@@ -1,27 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
-import { EventCard } from "@/components/event-card";
+import { EventCard, type EventRow } from "@/components/event-card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { events } from "@/lib/placeholder-data";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/explore")({
-  head: () => ({ meta: [{ title: "Explore Events — EventPass" }, { name: "description", content: "Browse upcoming community events." }] }),
+  head: () => ({ meta: [{ title: "Explore Events — EventPass" }] }),
   component: Explore,
 });
 
 function Explore() {
+  const [events, setEvents] = useState<EventRow[]>([]);
   const [includePast, setIncludePast] = useState(false);
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
 
+  useEffect(() => {
+    supabase
+      .from("events")
+      .select("id,title,cover_image_url,start_time,end_time,venue_address,is_online")
+      .eq("status", "published")
+      .eq("visibility", "public")
+      .order("start_time", { ascending: true })
+      .then(({ data }) => setEvents(data ?? []));
+  }, []);
+
+  const now = new Date();
   const filtered = events.filter((e) => {
-    if (!includePast && e.past) return false;
+    const past = new Date(e.end_time) < now;
+    if (!includePast && past) return false;
     if (q && !e.title.toLowerCase().includes(q.toLowerCase())) return false;
-    if (loc && !(e.venue + (e.online ? "online" : "")).toLowerCase().includes(loc.toLowerCase())) return false;
+    if (loc && !((e.venue_address || "") + (e.is_online ? " online" : "")).toLowerCase().includes(loc.toLowerCase())) return false;
     return true;
   });
 
@@ -40,8 +53,6 @@ function Explore() {
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="upcoming">Upcoming</SelectItem>
-                <SelectItem value="week">This week</SelectItem>
-                <SelectItem value="month">This month</SelectItem>
                 <SelectItem value="any">Any time</SelectItem>
               </SelectContent>
             </Select>
@@ -59,9 +70,7 @@ function Explore() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((e) => <EventCard key={e.id} event={e} />)}
         </div>
-        {filtered.length === 0 && (
-          <p className="text-center text-muted-foreground py-12">No events match your filters.</p>
-        )}
+        {filtered.length === 0 && <p className="text-center text-muted-foreground py-12">No events match your filters.</p>}
       </div>
     </SiteLayout>
   );
