@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, formatDate } from "@/lib/auth";
+import { useRoles } from "@/lib/use-roles";
 
 export const Route = createFileRoute("/my-events")({
   component: () => <RequireAuth><MyEvents /></RequireAuth>,
