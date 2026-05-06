@@ -23,6 +23,7 @@ function CheckIn() {
   const [code, setCode] = useState("");
   const [stats, setStats] = useState({ checked: 0, total: 0 });
   const [last, setLast] = useState<{ id: string; name: string; code: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; title: string; description?: string } | null>(null);
 
   const load = async () => {
     const { data: ev } = await supabase.from("events").select("title,start_time,capacity,host_id").eq("id", id).maybeSingle();
