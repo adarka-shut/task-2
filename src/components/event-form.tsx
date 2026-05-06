@@ -66,14 +66,20 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
     if (!file || !user) return;
     if (file.size > 5 * 1024 * 1024) { toast.error("File too large (max 5MB)"); return; }
     setUploading(true);
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("covers").upload(path, file, { upsert: false, contentType: file.type });
-    setUploading(false);
-    if (error) { toast.error(error.message); return; }
-    const { data } = supabase.storage.from("covers").getPublicUrl(path);
-    setCoverUrl(data.publicUrl);
-    toast.success("Cover uploaded");
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("covers").upload(path, file, { upsert: false, contentType: file.type, cacheControl: "3600" });
+      if (error) throw error;
+      const { data } = supabase.storage.from("covers").getPublicUrl(path);
+      setCoverUrl(data.publicUrl);
+      toast.success("Cover uploaded");
+    } catch (err: any) {
+      console.error("Cover upload failed", err);
+      toast.error(`Upload failed: ${err?.message ?? err?.error ?? "Unknown error"}`);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const save = async (status: "draft" | "published") => {
