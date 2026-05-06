@@ -206,6 +206,11 @@ function Dashboard() {
     <Row key={e.id} e={e} isHost={hostHostIdSet.has(e.host_id)} />
   );
 
+  const checkerEvents = events.filter((e) => !hostHostIdSet.has(e.host_id));
+  const hostEvents = events.filter((e) => hostHostIdSet.has(e.host_id));
+  const hostUpcoming = hostEvents.filter((e) => new Date(e.end_time) >= now);
+  const hostPast = hostEvents.filter((e) => new Date(e.end_time) < now);
+
   return (
     <SiteLayout>
       <div className="container mx-auto px-4 py-10">
@@ -227,26 +232,35 @@ function Dashboard() {
             )}
           </div>
         ) : (
-          <Tabs defaultValue="upcoming">
-            <TabsList>
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-              <TabsTrigger value="past">Past</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-              <TabsTrigger value="invites">Invites</TabsTrigger>
-            </TabsList>
-            <TabsContent value="upcoming" className="space-y-3 mt-4">
-              {upcoming.length === 0 ? <p className="text-muted-foreground py-6">No upcoming events. <Link to="/events/new" className="text-foreground font-medium underline hover:no-underline">Create one</Link>.</p> : upcoming.map(renderRow)}
-            </TabsContent>
-            <TabsContent value="past" className="space-y-3 mt-4">
-              {past.length === 0 ? <p className="text-muted-foreground py-6">No past events.</p> : past.map(renderRow)}
-            </TabsContent>
-            <TabsContent value="reports" className="mt-4">
-              <ReportsPanel hostIds={hostHostIds} />
-            </TabsContent>
-            <TabsContent value="invites" className="mt-4">
-              <InvitePanel hostIds={hostHostIds} />
-            </TabsContent>
-          </Tabs>
+          <>
+            <Tabs defaultValue="upcoming">
+              <TabsList>
+                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                <TabsTrigger value="past">Past</TabsTrigger>
+                <TabsTrigger value="reports">Reports</TabsTrigger>
+                <TabsTrigger value="invites">Invites</TabsTrigger>
+              </TabsList>
+              <TabsContent value="upcoming" className="space-y-3 mt-4">
+                {hostUpcoming.length === 0 ? <p className="text-muted-foreground py-6">No upcoming events. <Link to="/events/new" className="text-foreground font-medium underline hover:no-underline">Create one</Link>.</p> : hostUpcoming.map(renderRow)}
+              </TabsContent>
+              <TabsContent value="past" className="space-y-3 mt-4">
+                {hostPast.length === 0 ? <p className="text-muted-foreground py-6">No past events.</p> : hostPast.map(renderRow)}
+              </TabsContent>
+              <TabsContent value="reports" className="mt-4">
+                <ReportsPanel hostIds={hostHostIds} />
+              </TabsContent>
+              <TabsContent value="invites" className="mt-4">
+                <InvitePanel hostIds={hostHostIds} />
+              </TabsContent>
+            </Tabs>
+            {checkerEvents.length > 0 && (
+              <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Check-in assignments</h2>
+                <p className="text-muted-foreground mb-4">Events you can check attendees in for.</p>
+                <div className="space-y-3">{checkerEvents.map(renderRow)}</div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </SiteLayout>
