@@ -72,7 +72,7 @@ function Explore() {
     if (q && !e.title.toLowerCase().includes(q.toLowerCase())) return false;
     if (loc && loc !== "all") {
       if (loc === "__online__") { if (!e.is_online) return false; }
-      else if ((e.venue_address || "").trim() !== loc) return false;
+      else if (!(e.venue_address || "").toLowerCase().includes(loc.toLowerCase())) return false;
     }
     return true;
   });
