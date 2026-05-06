@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, formatDate } from "@/lib/auth";
+import { useRoles } from "@/lib/use-roles";
 
 export const Route = createFileRoute("/my-events")({
   component: () => <RequireAuth><MyEvents /></RequireAuth>,
@@ -15,6 +16,7 @@ type Ev = { id: string; title: string; start_time: string; hosts: { name: string
 
 function MyEvents() {
   const { user } = useAuth();
+  const { isHost } = useRoles();
   const [events, setEvents] = useState<Ev[]>([]);
 
   useEffect(() => {
@@ -44,8 +46,8 @@ function MyEvents() {
                     <div className="text-xs text-muted-foreground mt-0.5">{formatDate(e.start_time)} · {e.hosts?.name}</div>
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    <Button size="sm" variant="outline" asChild><Link to="/events/$id" params={{ id: e.id }}>View</Link></Button>
-                    <Button size="sm" variant="outline" asChild><Link to="/events/$id/edit" params={{ id: e.id }}>Edit</Link></Button>
+                    {isHost && <Button size="sm" variant="outline" asChild><Link to="/events/$id" params={{ id: e.id }}>View</Link></Button>}
+                    {isHost && <Button size="sm" variant="outline" asChild><Link to="/events/$id/edit" params={{ id: e.id }}>Edit</Link></Button>}
                     <Button size="sm" variant="outline" asChild><Link to="/events/$id/checkin" params={{ id: e.id }}>Check-in</Link></Button>
                   </div>
                 </CardContent>

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth";
+import { useRoles } from "@/lib/use-roles";
 import { CalendarDays, Menu, Plus } from "lucide-react";
 
 const navLinks = [{ to: "/explore", label: "Explore" }] as const;
@@ -28,9 +29,11 @@ const authedLinks = [
 function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { isHost, isCheckerOnly } = useRoles();
   const navigate = useNavigate();
   const isLoggedIn = !!user;
   const initial = (user?.user_metadata?.name || user?.email || "U").charAt(0).toUpperCase();
+  const dashboardLabel = isCheckerOnly ? "Check-in" : "Dashboard";
 
   const handleLogout = async () => {
     await signOut();
@@ -58,13 +61,13 @@ function Navbar() {
                 </Link>
               ))}
               <Link to="/dashboard" activeProps={{ className: "text-primary font-semibold" }} className="text-secondary-foreground/80 hover:text-primary">
-                Dashboard
+                {dashboardLabel}
               </Link>
             </>
           )}
         </nav>
         <div className="flex items-center gap-2">
-          {isLoggedIn && (
+          {isLoggedIn && isHost && (
             <Button size="sm" asChild className="hidden sm:inline-flex">
               <Link to="/events/new">
                 <Plus className="h-4 w-4 mr-1" /> Create Event
@@ -90,10 +93,10 @@ function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild><Link to="/dashboard">Dashboard</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/dashboard">{dashboardLabel}</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/tickets">My Tickets</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/my-events">My Events</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/host-settings">Host Settings</Link></DropdownMenuItem>
+                {isHost && <DropdownMenuItem asChild><Link to="/my-events">My Events</Link></DropdownMenuItem>}
+                {isHost && <DropdownMenuItem asChild><Link to="/host-settings">Host Settings</Link></DropdownMenuItem>}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
@@ -111,10 +114,10 @@ function Navbar() {
                 <Link to="/explore" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Explore</Link>
                 {isLoggedIn ? (
                   <>
-                    <Link to="/my-events" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Events</Link>
+                    {isHost && <Link to="/my-events" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Events</Link>}
                     <Link to="/tickets" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Tickets</Link>
-                    <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Dashboard</Link>
-                    <Link to="/events/new" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Create Event</Link>
+                    <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">{dashboardLabel}</Link>
+                    {isHost && <Link to="/events/new" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Create Event</Link>}
                     <button onClick={() => { setOpen(false); handleLogout(); }} className="py-2 text-sm text-left hover:text-primary">Logout</button>
                   </>
                 ) : (

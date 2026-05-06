@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
 import { RequireAuth } from "@/components/require-auth";
+import { HostOnly } from "@/components/host-only";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/host-settings")({
-  component: () => <RequireAuth><HostSettings /></RequireAuth>,
+  component: () => <RequireAuth><HostOnly><HostSettings /></HostOnly></RequireAuth>,
 });
 
 function HostSettings() {
