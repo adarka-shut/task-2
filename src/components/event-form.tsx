@@ -32,6 +32,7 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
   const [isOnline, setIsOnline] = useState(false);
   const [location, setLocation] = useState("");
   const [capacity, setCapacity] = useState(50);
+  const [visibility, setVisibility] = useState<"public" | "unlisted">("public");
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
