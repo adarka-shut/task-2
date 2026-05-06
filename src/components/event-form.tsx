@@ -131,6 +131,16 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
     if (data) navigate({ to: "/events/$id/edit", params: { id: data.id } });
   };
 
+  const deleteEvent = async () => {
+    if (!eventId) return;
+    setLoading(true);
+    const { error } = await supabase.from("events").delete().eq("id", eventId);
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Event deleted");
+    navigate({ to: "/dashboard" });
+  };
+
   if (hosts.length === 0) {
     return (
       <div className="container mx-auto px-4 py-10 max-w-3xl">
