@@ -38,26 +38,26 @@ function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
+    <header className="sticky top-0 z-40 w-full border-b border-secondary/40 bg-secondary text-secondary-foreground">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 font-semibold">
+        <Link to="/" className="flex items-center gap-2 font-semibold text-secondary-foreground">
           <CalendarDays className="h-5 w-5 text-primary" />
           <span>EventPass</span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
           {navLinks.map((l) => (
-            <Link key={l.to} to={l.to} activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
+            <Link key={l.to} to={l.to} activeProps={{ className: "text-primary font-semibold" }} className="text-secondary-foreground/80 hover:text-primary">
               {l.label}
             </Link>
           ))}
           {isLoggedIn && (
             <>
               {authedLinks.map((l) => (
-                <Link key={l.to} to={l.to} activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
+                <Link key={l.to} to={l.to} activeProps={{ className: "text-primary font-semibold" }} className="text-secondary-foreground/80 hover:text-primary">
                   {l.label}
                 </Link>
               ))}
-              <Link to="/dashboard" activeProps={{ className: "text-foreground font-medium" }} className="text-muted-foreground hover:text-foreground">
+              <Link to="/dashboard" activeProps={{ className: "text-primary font-semibold" }} className="text-secondary-foreground/80 hover:text-primary">
                 Dashboard
               </Link>
             </>
