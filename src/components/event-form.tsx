@@ -230,6 +230,17 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
           </div>
 
           <div>
+            <Label className="mb-2 block">Visibility</Label>
+            <div className="inline-flex rounded-md border p-1 gap-1">
+              <Button type="button" size="sm" variant={visibility === "public" ? "default" : "ghost"} onClick={() => setVisibility("public")}>Public</Button>
+              <Button type="button" size="sm" variant={visibility === "unlisted" ? "default" : "ghost"} onClick={() => setVisibility("unlisted")}>Unlisted</Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              {visibility === "public" ? "Listed on Explore and searchable." : "Not on Explore — accessible only via direct link."}
+            </p>
+          </div>
+
+          <div>
             <Label className="mb-2 block">Pricing</Label>
             <div className="inline-flex rounded-md border p-1 gap-1">
               <Button size="sm" variant="default">Free</Button>
