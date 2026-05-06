@@ -33,22 +33,24 @@ function HostSetup() {
 
   const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("File too large (max 5MB)"); return; }
+    if (!file) return;
+    if (file.size > 1 * 1024 * 1024) { toast.error("Logo too large (max 1MB)"); return; }
     setUploading(true);
     try {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type, cacheControl: "3600" });
-      if (error) throw error;
-      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      setLogoUrl(data.publicUrl);
-      toast.success("Logo uploaded");
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      setLogoUrl(dataUrl);
+      toast.success("Logo loaded");
     } catch (err: any) {
-      console.error("Logo upload failed", err);
-      toast.error(`Upload failed: ${err?.message ?? "Unknown error"}`);
+      console.error("Logo load failed", JSON.stringify(err, null, 2), err);
+      toast.error(`Load failed: ${err?.message ?? "Unknown error"}`);
     } finally {
       setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
   };
 
