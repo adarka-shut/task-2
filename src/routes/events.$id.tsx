@@ -9,6 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, formatDate, generateTicketCode } from "@/lib/auth";
 import { toast } from "sonner";
 import { promoteWaitlist, waitlistPosition } from "@/lib/rsvp";
+import { FeedbackSection } from "@/components/feedback-section";
+import { GallerySection } from "@/components/gallery-section";
+import { ReportButton } from "@/components/report-dialog";
 
 export const Route = createFileRoute("/events/$id")({
   component: EventPage,
@@ -111,12 +114,9 @@ function EventPage() {
               <h2 className="text-xl font-semibold mb-2">About this event</h2>
               <p className="text-muted-foreground whitespace-pre-line">{event.description}</p>
             </div>
-            {past && (
-              <Card>
-                <CardHeader><CardTitle>Post-event feedback</CardTitle></CardHeader>
-                <CardContent className="text-sm text-muted-foreground">Feedback collection will appear here after the event.</CardContent>
-              </Card>
-            )}
+            <div><ReportButton eventId={event.id} variant="outline" /></div>
+            {past && <FeedbackSection eventId={event.id} />}
+            {past && <GallerySection eventId={event.id} hostId={event.host_id} />}
           </div>
 
           <div className="space-y-4">
