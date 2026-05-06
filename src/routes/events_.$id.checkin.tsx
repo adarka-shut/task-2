@@ -46,16 +46,17 @@ function CheckIn() {
     const { data: r } = await supabase.from("rsvps")
       .select("id,checked_in,user_id,event_id,profiles(name)")
       .eq("ticket_code", c).maybeSingle();
-    if (!r) { toast.error("Invalid code"); return; }
-    if (r.event_id !== id) { toast.error("Ticket not for this event"); return; }
-    if (r.checked_in) { toast.error("Already checked in"); return; }
+    if (!r) { setFeedback({ type: "error", title: "Invalid code", description: `No ticket found for "${c}"` }); toast.error("Invalid code"); return; }
+    if (r.event_id !== id) { setFeedback({ type: "error", title: "Wrong event", description: "Ticket is not for this event" }); toast.error("Ticket not for this event"); return; }
+    if (r.checked_in) { setFeedback({ type: "error", title: "Already checked in", description: `Ticket ${c} was already scanned` }); toast.error("Already checked in"); return; }
     const { error } = await supabase.from("rsvps")
       .update({ checked_in: true, checked_in_at: new Date().toISOString() })
       .eq("id", r.id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { setFeedback({ type: "error", title: "Check-in failed", description: error.message }); toast.error(error.message); return; }
     const name = (r as any).profiles?.name ?? "Attendee";
     setLast({ id: r.id, name, code: c });
     setCode("");
+    setFeedback({ type: "success", title: `Checked in: ${name}`, description: `Ticket ${c}` });
     toast.success(`Checked in: ${name}`);
     load();
   };
