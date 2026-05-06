@@ -73,7 +73,7 @@ function Navbar() {
           )}
           {!isLoggedIn ? (
             <>
-              <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+              <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex text-secondary-foreground hover:bg-secondary/70 hover:text-primary">
                 <Link to="/login">Login</Link>
               </Button>
               <Button size="sm" asChild className="hidden md:inline-flex">
