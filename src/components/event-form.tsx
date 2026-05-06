@@ -100,6 +100,25 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
     navigate({ to: "/dashboard" });
   };
 
+  const duplicate = async () => {
+    if (!eventId) return;
+    setLoading(true);
+    const { data, error } = await supabase.from("events").insert({
+      host_id: hostId, title: `${title} (copy)`, description,
+      start_time: new Date(start).toISOString(),
+      end_time: new Date(end).toISOString(),
+      timezone, capacity, is_online: isOnline,
+      venue_address: isOnline ? null : location,
+      online_link: isOnline ? location : null,
+      cover_image_url: coverUrl,
+      status: "draft",
+    }).select("id").maybeSingle();
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Duplicated as draft");
+    if (data) navigate({ to: "/events/$id/edit", params: { id: data.id } });
+  };
+
   if (hosts.length === 0) {
     return (
       <div className="container mx-auto px-4 py-10 max-w-3xl">

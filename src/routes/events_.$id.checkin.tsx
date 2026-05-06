@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth, formatDate } from "@/lib/auth";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/events/$id/checkin")({
+export const Route = createFileRoute("/events_/$id/checkin")({
   component: () => <RequireAuth><CheckIn /></RequireAuth>,
 });
 
