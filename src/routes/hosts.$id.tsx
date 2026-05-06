@@ -6,6 +6,36 @@ import { Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/hosts/$id")({
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("hosts")
+      .select("id,name,bio,logo_url")
+      .eq("id", params.id)
+      .maybeSingle();
+    return { meta: data };
+  },
+  head: ({ loaderData, params }) => {
+    const h = loaderData?.meta as { name?: string; bio?: string | null; logo_url?: string | null } | null;
+    const title = h?.name || "Host";
+    const description = (h?.bio || `Events by ${title} on EventPass`).slice(0, 200);
+    const url = `/hosts/${params.id}`;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:url", content: url },
+      { property: "og:type", content: "profile" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
+    ];
+    if (h?.logo_url && !h.logo_url.startsWith("data:")) {
+      meta.push({ property: "og:image", content: h.logo_url });
+      meta.push({ name: "twitter:image", content: h.logo_url });
+    }
+    return { meta };
+  },
   component: HostPage,
 });
 
