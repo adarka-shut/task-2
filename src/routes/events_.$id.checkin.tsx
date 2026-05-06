@@ -5,6 +5,8 @@ import { RequireAuth } from "@/components/require-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, formatDate } from "@/lib/auth";
 import { toast } from "sonner";
@@ -21,6 +23,7 @@ function CheckIn() {
   const [code, setCode] = useState("");
   const [stats, setStats] = useState({ checked: 0, total: 0 });
   const [last, setLast] = useState<{ id: string; name: string; code: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; title: string; description?: string } | null>(null);
 
   const load = async () => {
     const { data: ev } = await supabase.from("events").select("title,start_time,capacity,host_id").eq("id", id).maybeSingle();
@@ -43,16 +46,17 @@ function CheckIn() {
     const { data: r } = await supabase.from("rsvps")
       .select("id,checked_in,user_id,event_id,profiles(name)")
       .eq("ticket_code", c).maybeSingle();
-    if (!r) { toast.error("Invalid code"); return; }
-    if (r.event_id !== id) { toast.error("Ticket not for this event"); return; }
-    if (r.checked_in) { toast.error("Already checked in"); return; }
+    if (!r) { setFeedback({ type: "error", title: "Invalid code", description: `No ticket found for "${c}"` }); toast.error("Invalid code"); return; }
+    if (r.event_id !== id) { setFeedback({ type: "error", title: "Wrong event", description: "Ticket is not for this event" }); toast.error("Ticket not for this event"); return; }
+    if (r.checked_in) { setFeedback({ type: "error", title: "Already checked in", description: `Ticket ${c} was already scanned` }); toast.error("Already checked in"); return; }
     const { error } = await supabase.from("rsvps")
       .update({ checked_in: true, checked_in_at: new Date().toISOString() })
       .eq("id", r.id);
-    if (error) { toast.error(error.message); return; }
+    if (error) { setFeedback({ type: "error", title: "Check-in failed", description: error.message }); toast.error(error.message); return; }
     const name = (r as any).profiles?.name ?? "Attendee";
     setLast({ id: r.id, name, code: c });
     setCode("");
+    setFeedback({ type: "success", title: `Checked in: ${name}`, description: `Ticket ${c}` });
     toast.success(`Checked in: ${name}`);
     load();
   };
@@ -81,6 +85,17 @@ function CheckIn() {
           <Card><CardContent><div className="text-sm text-muted-foreground">Checked in</div><div className="text-3xl font-bold">{stats.checked} / {stats.total}</div></CardContent></Card>
           <Card><CardContent><div className="text-sm text-muted-foreground">Capacity</div><div className="text-3xl font-bold">{event?.capacity}</div></CardContent></Card>
         </div>
+
+        {feedback && (
+          <Alert
+            variant={feedback.type === "error" ? "destructive" : "default"}
+            className={`mb-4 border-2 ${feedback.type === "success" ? "border-primary bg-primary/10 text-foreground" : ""}`}
+          >
+            {feedback.type === "success" ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
+            <AlertTitle className="text-lg font-bold">{feedback.title}</AlertTitle>
+            {feedback.description && <AlertDescription className="text-base">{feedback.description}</AlertDescription>}
+          </Alert>
+        )}
 
         <Card className="mb-4">
           <CardHeader><CardTitle className="text-base">Manual entry</CardTitle></CardHeader>

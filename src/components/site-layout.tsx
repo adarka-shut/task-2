@@ -93,6 +93,7 @@ function Navbar() {
                 <DropdownMenuItem asChild><Link to="/dashboard">Dashboard</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/tickets">My Tickets</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/my-events">My Events</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/host-settings">Host Settings</Link></DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
