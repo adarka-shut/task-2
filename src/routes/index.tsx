@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
 import { EventCard, type EventRow } from "@/components/event-card";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,6 +20,9 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [featured, setFeatured] = useState<EventRow[]>([]);
+  const [q, setQ] = useState("");
+  const navigate = useNavigate();
+
   useEffect(() => {
     supabase
       .from("events")
@@ -31,18 +35,23 @@ function Index() {
       .then(({ data }) => setFeatured(data ?? []));
   }, []);
 
+  const goExplore = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    navigate({ to: "/explore", search: { q: q || undefined } as any });
+  };
+
   return (
     <SiteLayout>
       <section className="container mx-auto px-4 pt-20 pb-16 text-center">
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight max-w-3xl mx-auto">Discover and host community events</h1>
         <p className="mt-6 text-lg text-muted-foreground max-w-xl mx-auto">Free events from real people in your community. RSVP in seconds, host without friction.</p>
-        <div className="mt-8 flex max-w-xl mx-auto gap-2">
+        <form onSubmit={goExplore} className="mt-8 flex max-w-xl mx-auto gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search events..." className="pl-9 h-11" />
+            <Input placeholder="Search events..." className="pl-9 h-11" value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
-          <Button size="lg" asChild><Link to="/explore">Browse</Link></Button>
-        </div>
+          <Button type="submit" size="lg">Browse</Button>
+        </form>
       </section>
 
       <section className="container mx-auto px-4 pb-20">

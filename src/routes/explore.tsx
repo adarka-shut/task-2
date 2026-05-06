@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
 import { EventCard, type EventRow } from "@/components/event-card";
 import { Input } from "@/components/ui/input";
@@ -9,15 +9,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/explore")({
+  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : undefined }),
   head: () => ({ meta: [{ title: "Explore Events — EventPass" }] }),
   component: Explore,
 });
 
+type WhenFilter = "upcoming" | "week" | "month" | "custom";
+
 function Explore() {
+  const search = Route.useSearch();
   const [events, setEvents] = useState<EventRow[]>([]);
   const [includePast, setIncludePast] = useState(false);
-  const [q, setQ] = useState("");
-  const [loc, setLoc] = useState("");
+  const [q, setQ] = useState(search.q ?? "");
+  const [loc, setLoc] = useState<string>("all");
+  const [when, setWhen] = useState<WhenFilter>("upcoming");
+  const [customStart, setCustomStart] = useState("");
+  const [customEnd, setCustomEnd] = useState("");
 
   useEffect(() => {
     supabase
@@ -29,12 +36,44 @@ function Explore() {
       .then(({ data }) => setEvents(data ?? []));
   }, []);
 
+  const locations = useMemo(() => {
+    const set = new Set<string>();
+    events.forEach((e) => {
+      if (e.venue_address && e.venue_address.trim()) set.add(e.venue_address.trim());
+    });
+    return Array.from(set).sort();
+  }, [events]);
+
+  const hasOnline = useMemo(() => events.some((e) => e.is_online), [events]);
+
   const now = new Date();
+  const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay()); startOfWeek.setHours(0,0,0,0);
+  const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(startOfWeek.getDate() + 7);
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
   const filtered = events.filter((e) => {
-    const past = new Date(e.end_time) < now;
-    if (!includePast && past) return false;
+    const start = new Date(e.start_time);
+    const end = new Date(e.end_time);
+    const past = end < now;
+    if (!includePast) {
+      if (past) return false;
+      if (when === "upcoming" && start < now && end < now) return false;
+      if (when === "week" && (end < startOfWeek || start >= endOfWeek)) return false;
+      if (when === "month" && (end < startOfMonth || start >= endOfMonth)) return false;
+      if (when === "custom") {
+        if (customStart && end < new Date(customStart)) return false;
+        if (customEnd) {
+          const ce = new Date(customEnd); ce.setHours(23,59,59,999);
+          if (start > ce) return false;
+        }
+      }
+    }
     if (q && !e.title.toLowerCase().includes(q.toLowerCase())) return false;
-    if (loc && !((e.venue_address || "") + (e.is_online ? " online" : "")).toLowerCase().includes(loc.toLowerCase())) return false;
+    if (loc && loc !== "all") {
+      if (loc === "__online__") { if (!e.is_online) return false; }
+      else if ((e.venue_address || "").trim() !== loc) return false;
+    }
     return true;
   });
 
@@ -49,18 +88,39 @@ function Explore() {
           </div>
           <div>
             <Label className="mb-1.5 block">When</Label>
-            <Select defaultValue="upcoming">
+            <Select value={when} onValueChange={(v) => setWhen(v as WhenFilter)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="upcoming">Upcoming</SelectItem>
-                <SelectItem value="any">Any time</SelectItem>
+                <SelectItem value="week">This week</SelectItem>
+                <SelectItem value="month">This month</SelectItem>
+                <SelectItem value="custom">Custom range</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label className="mb-1.5 block">Location</Label>
-            <Input placeholder="City or 'Online'" value={loc} onChange={(e) => setLoc(e.target.value)} />
+            <Select value={loc} onValueChange={setLoc}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All locations</SelectItem>
+                {hasOnline && <SelectItem value="__online__">Online</SelectItem>}
+                {locations.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </div>
+          {when === "custom" && (
+            <>
+              <div>
+                <Label className="mb-1.5 block">From</Label>
+                <Input type="date" value={customStart} onChange={(e) => setCustomStart(e.target.value)} />
+              </div>
+              <div>
+                <Label className="mb-1.5 block">To</Label>
+                <Input type="date" value={customEnd} onChange={(e) => setCustomEnd(e.target.value)} />
+              </div>
+            </>
+          )}
           <div className="md:col-span-4 flex items-center gap-2">
             <Switch id="past" checked={includePast} onCheckedChange={setIncludePast} />
             <Label htmlFor="past">Include past events</Label>

@@ -8,11 +8,15 @@ import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { DateTimePicker } from "@/components/date-time-picker";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: string }) {
   const { user } = useAuth();
@@ -125,6 +129,16 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
     if (error) return toast.error(error.message);
     toast.success("Duplicated as draft");
     if (data) navigate({ to: "/events/$id/edit", params: { id: data.id } });
+  };
+
+  const deleteEvent = async () => {
+    if (!eventId) return;
+    setLoading(true);
+    const { error } = await supabase.from("events").delete().eq("id", eventId);
+    setLoading(false);
+    if (error) return toast.error(error.message);
+    toast.success("Event deleted");
+    navigate({ to: "/dashboard" });
   };
 
   if (hosts.length === 0) {
@@ -241,6 +255,31 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
               </>
             )}
           </div>
+          {mode === "edit" && eventId && (
+            <div className="pt-6 border-t mt-4">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" disabled={loading}>
+                    <Trash2 className="h-4 w-4 mr-2" /> Delete Event
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete this event?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to delete this event? This cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={deleteEvent} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
