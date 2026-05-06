@@ -152,7 +152,7 @@ function InvitePanel({ hostIds }: { hostIds: string[] }) {
       <CardHeader><CardTitle>Invite Members</CardTitle></CardHeader>
       <CardContent className="space-y-4">
         <div className="flex gap-2">
-          <Button size="sm" onClick={() => create("host")}>Invite Host</Button>
+          <Button size="sm" variant="outline" onClick={() => create("host")}>Invite Host</Button>
           <Button size="sm" variant="outline" onClick={() => create("checker")}>Invite Checker</Button>
         </div>
         {links.length > 0 && (
