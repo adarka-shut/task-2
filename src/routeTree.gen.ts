@@ -13,6 +13,7 @@ import { Route as TicketsRouteImport } from './routes/tickets'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as MyEventsRouteImport } from './routes/my-events'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as HostSetupRouteImport } from './routes/host-setup'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AboutRouteImport } from './routes/about'
@@ -41,6 +42,11 @@ const MyEventsRoute = MyEventsRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostSetupRoute = HostSetupRouteImport.update({
+  id: '/host-setup',
+  path: '/host-setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExploreRoute = ExploreRouteImport.update({
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
+  '/host-setup': typeof HostSetupRoute
   '/login': typeof LoginRoute
   '/my-events': typeof MyEventsRoute
   '/register': typeof RegisterRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
+  '/host-setup': typeof HostSetupRoute
   '/login': typeof LoginRoute
   '/my-events': typeof MyEventsRoute
   '/register': typeof RegisterRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
+  '/host-setup': typeof HostSetupRoute
   '/login': typeof LoginRoute
   '/my-events': typeof MyEventsRoute
   '/register': typeof RegisterRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/dashboard'
     | '/explore'
+    | '/host-setup'
     | '/login'
     | '/my-events'
     | '/register'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/dashboard'
     | '/explore'
+    | '/host-setup'
     | '/login'
     | '/my-events'
     | '/register'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/dashboard'
     | '/explore'
+    | '/host-setup'
     | '/login'
     | '/my-events'
     | '/register'
@@ -188,6 +200,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   DashboardRoute: typeof DashboardRoute
   ExploreRoute: typeof ExploreRoute
+  HostSetupRoute: typeof HostSetupRoute
   LoginRoute: typeof LoginRoute
   MyEventsRoute: typeof MyEventsRoute
   RegisterRoute: typeof RegisterRoute
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/host-setup': {
+      id: '/host-setup'
+      path: '/host-setup'
+      fullPath: '/host-setup'
+      preLoaderRoute: typeof HostSetupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explore': {
@@ -312,6 +332,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   DashboardRoute: DashboardRoute,
   ExploreRoute: ExploreRoute,
+  HostSetupRoute: HostSetupRoute,
   LoginRoute: LoginRoute,
   MyEventsRoute: MyEventsRoute,
   RegisterRoute: RegisterRoute,
