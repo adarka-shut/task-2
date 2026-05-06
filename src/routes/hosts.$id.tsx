@@ -35,7 +35,7 @@ function HostPage() {
           <div>
             <h1 className="text-3xl font-bold">{host.name}</h1>
             <p className="mt-2 text-muted-foreground max-w-xl">{host.bio}</p>
-            <a href={`mailto:${host.contact_email}`} className="mt-3 inline-flex items-center gap-2 text-sm text-primary hover:underline">
+            <a href={`mailto:${host.contact_email}`} className="mt-3 inline-flex items-center gap-2 text-sm text-foreground font-medium underline hover:no-underline">
               <Mail className="h-4 w-4" /> {host.contact_email}
             </a>
           </div>

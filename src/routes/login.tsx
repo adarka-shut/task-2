@@ -40,7 +40,7 @@ function Login() {
               <div><Label className="mb-1.5 block">Password</Label><Input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} /></div>
               <Button type="submit" className="w-full" disabled={loading}>Sign in</Button>
               <p className="text-sm text-center text-muted-foreground">
-                No account? <Link to="/register" className="text-primary hover:underline">Register</Link>
+                No account? <Link to="/register" className="text-foreground font-medium underline hover:no-underline">Register</Link>
               </p>
             </form>
           </CardContent>
