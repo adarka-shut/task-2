@@ -83,7 +83,7 @@ function Navbar() {
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
+                <Button variant="ghost" size="icon" className="rounded-full text-secondary-foreground hover:bg-secondary/70">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>{initial}</AvatarFallback>
                   </Avatar>
