@@ -67,7 +67,7 @@ function Navbar() {
           )}
         </nav>
         <div className="flex items-center gap-2">
-          {isLoggedIn && isHost && (
+          {isLoggedIn && (
             <Button size="sm" asChild className="hidden sm:inline-flex">
               <Link to="/events/new">
                 <Plus className="h-4 w-4 mr-1" /> Create Event
