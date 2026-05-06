@@ -126,6 +126,7 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
       venue_address: isOnline ? null : location,
       online_link: isOnline ? location : null,
       cover_image_url: coverUrl,
+      visibility,
       status: "draft",
     }).select("id").maybeSingle();
     setLoading(false);
