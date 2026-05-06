@@ -197,7 +197,6 @@ function Dashboard() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Host dashboard</h1>
           <div className="flex gap-2">
-            <Button variant="outline" size="icon" asChild title="Host Settings"><Link to="/host-settings"><Settings className="h-4 w-4" /></Link></Button>
             <Button asChild><Link to="/events/new"><Plus className="h-4 w-4 mr-2" />Create Event</Link></Button>
           </div>
         </div>
