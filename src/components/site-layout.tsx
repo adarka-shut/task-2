@@ -114,10 +114,10 @@ function Navbar() {
                 <Link to="/explore" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Explore</Link>
                 {isLoggedIn ? (
                   <>
-                    <Link to="/my-events" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Events</Link>
+                    {isHost && <Link to="/my-events" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Events</Link>}
                     <Link to="/tickets" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Tickets</Link>
-                    <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Dashboard</Link>
-                    <Link to="/events/new" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Create Event</Link>
+                    <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">{dashboardLabel}</Link>
+                    {isHost && <Link to="/events/new" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Create Event</Link>}
                     <button onClick={() => { setOpen(false); handleLogout(); }} className="py-2 text-sm text-left hover:text-primary">Logout</button>
                   </>
                 ) : (
