@@ -7,21 +7,52 @@ import { Button } from "@/components/ui/button";
 import { QrCode, Calendar, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, formatDate } from "@/lib/auth";
+import { toast } from "sonner";
+import { downloadIcs } from "@/lib/calendar";
+import { promoteWaitlist } from "@/lib/rsvp";
 
 export const Route = createFileRoute("/tickets")({
   component: () => <RequireAuth><Tickets /></RequireAuth>,
 });
 
-type T = { id: string; ticket_code: string; status: string; events: { id: string; title: string; start_time: string; venue_address: string | null; is_online: boolean } | null };
+type T = {
+  id: string; ticket_code: string; status: string;
+  events: { id: string; title: string; description: string | null; start_time: string; end_time: string; venue_address: string | null; online_link: string | null; is_online: boolean } | null;
+};
 
 function Tickets() {
   const { user } = useAuth();
   const [tickets, setTickets] = useState<T[]>([]);
 
-  useEffect(() => {
+  const load = async () => {
     if (!user) return;
-    supabase.from("rsvps").select("id,ticket_code,status,events(id,title,start_time,venue_address,is_online)").eq("user_id", user.id).then(({ data }) => setTickets((data as any) ?? []));
-  }, [user]);
+    const { data } = await supabase.from("rsvps")
+      .select("id,ticket_code,status,events(id,title,description,start_time,end_time,venue_address,online_link,is_online)")
+      .eq("user_id", user.id).neq("status", "cancelled");
+    setTickets((data as any) ?? []);
+  };
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [user]);
+
+  const cancel = async (t: T) => {
+    const wasConfirmed = t.status === "confirmed";
+    const { error } = await supabase.from("rsvps").update({ status: "cancelled" }).eq("id", t.id);
+    if (error) return toast.error(error.message);
+    if (wasConfirmed && t.events) await promoteWaitlist(t.events.id);
+    toast.success("RSVP cancelled");
+    load();
+  };
+
+  const addToCalendar = (t: T) => {
+    if (!t.events) return;
+    downloadIcs({
+      uid: t.id,
+      title: t.events.title,
+      description: t.events.description ?? "",
+      start: t.events.start_time,
+      end: t.events.end_time,
+      location: t.events.is_online ? (t.events.online_link ?? "Online") : (t.events.venue_address ?? ""),
+    });
+  };
 
   return (
     <SiteLayout>
@@ -41,8 +72,9 @@ function Tickets() {
                   <div className="text-sm text-muted-foreground flex items-center gap-2"><MapPin className="h-3.5 w-3.5" />{t.events.is_online ? "Online" : t.events.venue_address || "TBA"}</div>
                   <div className="font-mono text-xs bg-muted px-2 py-1 rounded inline-block">{t.ticket_code}</div>
                   <div className="text-xs text-muted-foreground capitalize">Status: {t.status}</div>
-                  <div className="flex gap-2 pt-2">
-                    <Button size="sm" variant="outline">Add to Calendar</Button>
+                  <div className="flex gap-2 pt-2 flex-wrap">
+                    <Button size="sm" variant="outline" onClick={() => addToCalendar(t)}>Add to Calendar</Button>
+                    <Button size="sm" variant="outline" onClick={() => cancel(t)}>Cancel RSVP</Button>
                   </div>
                 </div>
               </CardContent>

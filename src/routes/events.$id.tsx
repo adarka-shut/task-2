@@ -8,6 +8,7 @@ import { Calendar, MapPin, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, formatDate, generateTicketCode } from "@/lib/auth";
 import { toast } from "sonner";
+import { promoteWaitlist, waitlistPosition } from "@/lib/rsvp";
 
 export const Route = createFileRoute("/events/$id")({
   component: EventPage,
@@ -27,6 +28,7 @@ function EventPage() {
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [going, setGoing] = useState(0);
   const [myRsvp, setMyRsvp] = useState<{ id: string; status: string } | null>(null);
+  const [position, setPosition] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
@@ -39,8 +41,10 @@ function EventPage() {
     const { count } = await supabase.from("rsvps").select("*", { count: "exact", head: true }).eq("event_id", id).eq("status", "confirmed");
     setGoing(count ?? 0);
     if (user) {
-      const { data: r } = await supabase.from("rsvps").select("id,status").eq("event_id", id).eq("user_id", user.id).maybeSingle();
+      const { data: r } = await supabase.from("rsvps").select("id,status").eq("event_id", id).eq("user_id", user.id).neq("status", "cancelled").maybeSingle();
       setMyRsvp(r);
+      if (r?.status === "waitlisted") setPosition(await waitlistPosition(id, r.id));
+      else setPosition(null);
     } else {
       setMyRsvp(null);
     }
@@ -51,6 +55,7 @@ function EventPage() {
   if (!event) return <SiteLayout><div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading…</div></SiteLayout>;
 
   const past = new Date(event.end_time) < new Date();
+  const full = going >= event.capacity;
   const cover = event.cover_image_url || `https://placehold.co/1200x600?text=${encodeURIComponent(event.title)}`;
   const host = event.hosts;
 
@@ -60,13 +65,25 @@ function EventPage() {
       return;
     }
     setLoading(true);
-    const status = going >= event.capacity ? "waitlisted" : "confirmed";
+    const status = full ? "waitlisted" : "confirmed";
     const { error } = await supabase.from("rsvps").insert({
       event_id: id, user_id: user.id, status, ticket_code: generateTicketCode(),
     });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success(status === "confirmed" ? "You're going!" : "Added to waitlist");
+    load();
+  };
+
+  const handleCancel = async () => {
+    if (!myRsvp) return;
+    setLoading(true);
+    const wasConfirmed = myRsvp.status === "confirmed";
+    const { error } = await supabase.from("rsvps").update({ status: "cancelled" }).eq("id", myRsvp.id);
+    if (error) { setLoading(false); toast.error(error.message); return; }
+    if (wasConfirmed) await promoteWaitlist(id);
+    setLoading(false);
+    toast.success("RSVP cancelled");
     load();
   };
 
@@ -108,9 +125,16 @@ function EventPage() {
                 <CardContent className="space-y-4">
                   <div className="text-sm text-muted-foreground">Free event</div>
                   {myRsvp ? (
-                    <Button className="w-full" disabled>{myRsvp.status === "confirmed" ? "You're going" : "On waitlist"}</Button>
+                    <div className="space-y-2">
+                      <Button className="w-full" disabled>
+                        {myRsvp.status === "confirmed" ? "You're going" : `On waitlist${position ? ` (position ${position})` : ""}`}
+                      </Button>
+                      <Button className="w-full" variant="outline" onClick={handleCancel} disabled={loading}>Cancel RSVP</Button>
+                    </div>
                   ) : (
-                    <Button className="w-full" onClick={handleRsvp} disabled={loading}>RSVP</Button>
+                    <Button className="w-full" onClick={handleRsvp} disabled={loading}>
+                      {full ? "Join waitlist" : "RSVP"}
+                    </Button>
                   )}
                 </CardContent>
               </Card>

@@ -8,6 +8,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Plus } from "lucide-react";
+import { downloadCsv } from "@/lib/calendar";
+import { toast } from "sonner";
+
+async function exportCsv(eventId: string, title: string) {
+  const { data, error } = await supabase.from("rsvps")
+    .select("status,checked_in_at,profiles(name,email)")
+    .eq("event_id", eventId);
+  if (error) return toast.error(error.message);
+  const rows = (data ?? []).map((r: any) => ({
+    name: r.profiles?.name ?? "",
+    email: r.profiles?.email ?? "",
+    rsvp_status: r.status,
+    checked_in_time: r.checked_in_at ?? "",
+  }));
+  downloadCsv(`${title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-attendees.csv`, rows);
+}
 
 export const Route = createFileRoute("/dashboard")({
   component: () => <RequireAuth><Dashboard /></RequireAuth>,
@@ -23,9 +39,10 @@ function Row({ e }: { e: Ev }) {
           <Link to="/events/$id" params={{ id: e.id }} className="font-medium hover:text-primary">{e.title}</Link>
           <div className="text-xs text-muted-foreground mt-1">Going {e.going} / {e.capacity}</div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button size="sm" variant="outline" asChild><Link to="/events/$id/edit" params={{ id: e.id }}>Edit</Link></Button>
           <Button size="sm" variant="outline" asChild><Link to="/events/$id/checkin" params={{ id: e.id }}>Check-in</Link></Button>
+          <Button size="sm" variant="outline" onClick={() => exportCsv(e.id, e.title)}>Export CSV</Button>
         </div>
       </CardContent>
     </Card>
