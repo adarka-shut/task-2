@@ -99,15 +99,23 @@ function Explore() {
             </Select>
           </div>
           <div>
-            <Label className="mb-1.5 block">Location</Label>
-            <Select value={loc} onValueChange={setLoc}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All locations</SelectItem>
-                {hasOnline && <SelectItem value="__online__">Online</SelectItem>}
-                {locations.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="loc-input" className="mb-1.5 block">Location</Label>
+            <Input
+              id="loc-input"
+              list="loc-options"
+              placeholder="All locations (type or pick)"
+              value={loc === "all" ? "" : loc === "__online__" ? "Online" : loc}
+              onChange={(e) => {
+                const v = e.target.value.trim();
+                if (!v) setLoc("all");
+                else if (v.toLowerCase() === "online") setLoc("__online__");
+                else setLoc(v);
+              }}
+            />
+            <datalist id="loc-options">
+              {hasOnline && <option value="Online" />}
+              {locations.map((l) => <option key={l} value={l} />)}
+            </datalist>
           </div>
           {when === "custom" && (
             <>
