@@ -86,6 +86,17 @@ function CheckIn() {
           <Card><CardContent><div className="text-sm text-muted-foreground">Capacity</div><div className="text-3xl font-bold">{event?.capacity}</div></CardContent></Card>
         </div>
 
+        {feedback && (
+          <Alert
+            variant={feedback.type === "error" ? "destructive" : "default"}
+            className={`mb-4 border-2 ${feedback.type === "success" ? "border-primary bg-primary/10 text-foreground" : ""}`}
+          >
+            {feedback.type === "success" ? <CheckCircle2 className="h-5 w-5" /> : <XCircle className="h-5 w-5" />}
+            <AlertTitle className="text-lg font-bold">{feedback.title}</AlertTitle>
+            {feedback.description && <AlertDescription className="text-base">{feedback.description}</AlertDescription>}
+          </Alert>
+        )}
+
         <Card className="mb-4">
           <CardHeader><CardTitle className="text-base">Manual entry</CardTitle></CardHeader>
           <CardContent className="flex gap-2">
