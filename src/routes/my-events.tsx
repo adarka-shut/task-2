@@ -16,6 +16,7 @@ type Ev = { id: string; title: string; start_time: string; hosts: { name: string
 
 function MyEvents() {
   const { user } = useAuth();
+  const { isHost } = useRoles();
   const [events, setEvents] = useState<Ev[]>([]);
 
   useEffect(() => {
