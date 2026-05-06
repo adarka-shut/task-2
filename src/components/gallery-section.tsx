@@ -34,28 +34,24 @@ export function GallerySection({ eventId, hostId }: { eventId: string; hostId: s
     if (!file || !user) return;
     if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB"); return; }
     setUploading(true);
-    let url: string | null = null;
     try {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("gallery").upload(path, file, { contentType: file.type });
-      if (error) throw error;
-      url = supabase.storage.from("gallery").getPublicUrl(path).data.publicUrl;
-    } catch (err) {
-      console.warn("Storage upload failed, falling back to data URL", err);
-      url = await new Promise<string>((resolve, reject) => {
+      const url = await new Promise<string>((resolve, reject) => {
         const r = new FileReader();
         r.onload = () => resolve(r.result as string);
         r.onerror = () => reject(r.error);
         r.readAsDataURL(file);
       });
+      const { error } = await supabase.from("gallery").insert({ event_id: eventId, user_id: user.id, image_url: url, approved: false });
+      if (error) throw error;
+      toast.success("Photo submitted for approval");
+      load();
+    } catch (err: any) {
+      console.error("Photo upload failed:", err);
+      toast.error(`Upload failed: ${err?.message ?? "Unknown error"}`);
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
-    const { error } = await supabase.from("gallery").insert({ event_id: eventId, user_id: user.id, image_url: url!, approved: false });
-    setUploading(false);
-    if (fileRef.current) fileRef.current.value = "";
-    if (error) return toast.error(error.message);
-    toast.success("Photo submitted — pending approval");
-    load();
   };
 
   const approve = async (id: string) => {

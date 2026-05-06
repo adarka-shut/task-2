@@ -24,13 +24,24 @@ function InvitePage() {
       return;
     }
     (async () => {
-      const { data: invite, error } = await supabase.from("invite_links").select("id,host_id,role,used_by").eq("token", token).maybeSingle();
-      if (error || !invite) { setMsg("Invalid or expired invite link."); return; }
-      const { error: mErr } = await supabase.from("host_members").insert({ host_id: invite.host_id, user_id: user.id, role: invite.role });
-      if (mErr && !mErr.message.includes("duplicate")) { setMsg(mErr.message); return; }
-      await supabase.from("invite_links").update({ used_by: user.id }).eq("id", invite.id);
-      toast.success(`You're now a ${invite.role} for this host`);
-      navigate({ to: "/dashboard" });
+      try {
+        const { data: invite, error } = await supabase.from("invite_links").select("id,host_id,role,used_by").eq("token", token).maybeSingle();
+        if (error) console.error("Invite fetch error:", error);
+        if (error || !invite) { setMsg("Invalid or expired invite link."); return; }
+        const { error: mErr } = await supabase.from("host_members").insert({ host_id: invite.host_id, user_id: user.id, role: invite.role });
+        if (mErr && !mErr.message.toLowerCase().includes("duplicate")) {
+          console.error("host_members insert error:", mErr);
+          setMsg(mErr.message);
+          return;
+        }
+        const { error: uErr } = await supabase.from("invite_links").update({ used_by: user.id }).eq("id", invite.id);
+        if (uErr) console.error("invite_links update error:", uErr);
+        toast.success(`You're now a ${invite.role} for this host`);
+        navigate({ to: "/dashboard" });
+      } catch (e: any) {
+        console.error("Invite acceptance failed:", e);
+        setMsg(e?.message ?? "Failed to accept invite.");
+      }
     })();
   }, [user, loading, token, navigate]);
 
