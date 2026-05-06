@@ -93,10 +93,10 @@ function Navbar() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem asChild><Link to="/dashboard">Dashboard</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link to="/dashboard">{dashboardLabel}</Link></DropdownMenuItem>
                 <DropdownMenuItem asChild><Link to="/tickets">My Tickets</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/my-events">My Events</Link></DropdownMenuItem>
-                <DropdownMenuItem asChild><Link to="/host-settings">Host Settings</Link></DropdownMenuItem>
+                {isHost && <DropdownMenuItem asChild><Link to="/my-events">My Events</Link></DropdownMenuItem>}
+                {isHost && <DropdownMenuItem asChild><Link to="/host-settings">Host Settings</Link></DropdownMenuItem>}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuContent>
