@@ -25,7 +25,7 @@ export function EventCard({ event }: { event: EventRow }) {
           {past && <Badge variant="secondary" className="absolute top-3 left-3">Ended</Badge>}
         </div>
         <CardContent className="space-y-2">
-          <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">{event.title}</h3>
+          <h3 className="font-semibold line-clamp-2 text-foreground transition-colors">{event.title}</h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="h-3.5 w-3.5" />
             {formatDate(event.start_time)}

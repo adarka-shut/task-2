@@ -37,7 +37,7 @@ function Row({ e }: { e: Ev }) {
     <Card>
       <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <Link to="/events/$id" params={{ id: e.id }} className="font-medium hover:text-primary">{e.title}</Link>
+          <Link to="/events/$id" params={{ id: e.id }} className="font-medium text-foreground hover:underline">{e.title}</Link>
           <div className="text-xs text-muted-foreground mt-1">Going {e.going} / {e.capacity}</div>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -206,7 +206,7 @@ function Dashboard() {
             <TabsTrigger value="invites">Invites</TabsTrigger>
           </TabsList>
           <TabsContent value="upcoming" className="space-y-3 mt-4">
-            {upcoming.length === 0 ? <p className="text-muted-foreground py-6">No upcoming events. <Link to="/events/new" className="text-primary hover:underline">Create one</Link>.</p> : upcoming.map((e) => <Row key={e.id} e={e} />)}
+            {upcoming.length === 0 ? <p className="text-muted-foreground py-6">No upcoming events. <Link to="/events/new" className="text-foreground font-medium underline hover:no-underline">Create one</Link>.</p> : upcoming.map((e) => <Row key={e.id} e={e} />)}
           </TabsContent>
           <TabsContent value="past" className="space-y-3 mt-4">
             {past.length === 0 ? <p className="text-muted-foreground py-6">No past events.</p> : past.map((e) => <Row key={e.id} e={e} />)}

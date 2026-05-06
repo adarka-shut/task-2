@@ -47,11 +47,11 @@ function Register() {
               <Button type="submit" className="w-full" disabled={loading}>Sign up</Button>
               {!host && (
                 <p className="text-sm text-center text-muted-foreground">
-                  Want to host events? <Link to="/register" search={{ host: true } as any} className="text-primary hover:underline">Register as Host</Link>
+                  Want to host events? <Link to="/register" search={{ host: true } as any} className="text-foreground font-medium underline hover:no-underline">Register as Host</Link>
                 </p>
               )}
               <p className="text-sm text-center text-muted-foreground">
-                Already a member? <Link to="/login" className="text-primary hover:underline">Sign in</Link>
+                Already a member? <Link to="/login" className="text-foreground font-medium underline hover:no-underline">Sign in</Link>
               </p>
             </form>
           </CardContent>

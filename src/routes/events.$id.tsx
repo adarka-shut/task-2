@@ -14,6 +14,36 @@ import { GallerySection } from "@/components/gallery-section";
 import { ReportButton } from "@/components/report-dialog";
 
 export const Route = createFileRoute("/events/$id")({
+  loader: async ({ params }) => {
+    const { data } = await supabase
+      .from("events")
+      .select("id,title,description,cover_image_url")
+      .eq("id", params.id)
+      .maybeSingle();
+    return { meta: data };
+  },
+  head: ({ loaderData, params }) => {
+    const e = loaderData?.meta as { title?: string; description?: string | null; cover_image_url?: string | null } | null;
+    const title = e?.title || "Event";
+    const description = (e?.description || "View event details on EventPass").slice(0, 200);
+    const url = `/events/${params.id}`;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:url", content: url },
+      { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: title },
+      { name: "twitter:description", content: description },
+    ];
+    if (e?.cover_image_url && !e.cover_image_url.startsWith("data:")) {
+      meta.push({ property: "og:image", content: e.cover_image_url });
+      meta.push({ name: "twitter:image", content: e.cover_image_url });
+    }
+    return { meta };
+  },
   component: EventPage,
 });
 
@@ -146,7 +176,7 @@ function EventPage() {
                   <Link to="/hosts/$id" params={{ id: host.id }} className="flex items-center gap-3 group">
                     <img src={host.logo_url || `https://placehold.co/120x120?text=${encodeURIComponent(host.name.charAt(0))}`} alt={host.name} className="h-12 w-12 rounded-full" />
                     <div>
-                      <div className="font-medium group-hover:text-primary">{host.name}</div>
+                      <div className="font-medium text-foreground group-hover:underline">{host.name}</div>
                       <div className="text-xs text-muted-foreground line-clamp-2">{host.bio}</div>
                     </div>
                   </Link>

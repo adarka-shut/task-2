@@ -48,7 +48,7 @@ function Index() {
       <section className="container mx-auto px-4 pb-20">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold">Featured events</h2>
-          <Link to="/explore" className="text-sm text-primary hover:underline">View all →</Link>
+          <Link to="/explore" className="text-sm text-foreground font-medium underline hover:no-underline">View all →</Link>
         </div>
         {featured.length === 0 ? (
           <p className="text-muted-foreground text-center py-8">No upcoming events yet. Be the first to host!</p>

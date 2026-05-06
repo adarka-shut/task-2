@@ -33,7 +33,7 @@ function MyEvents() {
       <div className="container mx-auto px-4 py-10">
         <h1 className="text-3xl font-bold mb-6">My Events</h1>
         {events.length === 0 ? (
-          <p className="text-muted-foreground">You're not managing any events yet. <Link to="/host-setup" className="text-primary hover:underline">Set up a host profile</Link> to get started.</p>
+          <p className="text-muted-foreground">You're not managing any events yet. <Link to="/host-setup" className="text-foreground font-medium underline hover:no-underline">Set up a host profile</Link> to get started.</p>
         ) : (
           <div className="space-y-3">
             {events.map((e) => (

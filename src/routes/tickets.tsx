@@ -67,7 +67,7 @@ function Tickets() {
                   <QrCode className="h-16 w-16 text-muted-foreground" />
                 </div>
                 <div className="flex-1 space-y-2">
-                  <Link to="/events/$id" params={{ id: t.events.id }} className="font-semibold text-lg hover:text-primary">{t.events.title}</Link>
+                  <Link to="/events/$id" params={{ id: t.events.id }} className="font-semibold text-lg text-foreground hover:underline">{t.events.title}</Link>
                   <div className="text-sm text-muted-foreground flex items-center gap-2"><Calendar className="h-3.5 w-3.5" />{formatDate(t.events.start_time)}</div>
                   <div className="text-sm text-muted-foreground flex items-center gap-2"><MapPin className="h-3.5 w-3.5" />{t.events.is_online ? "Online" : t.events.venue_address || "TBA"}</div>
                   <div className="font-mono text-xs bg-muted px-2 py-1 rounded inline-block">{t.ticket_code}</div>
