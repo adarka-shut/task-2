@@ -29,9 +29,11 @@ const authedLinks = [
 function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { isHost, isCheckerOnly } = useRoles();
   const navigate = useNavigate();
   const isLoggedIn = !!user;
   const initial = (user?.user_metadata?.name || user?.email || "U").charAt(0).toUpperCase();
+  const dashboardLabel = isCheckerOnly ? "Check-in" : "Dashboard";
 
   const handleLogout = async () => {
     await signOut();
