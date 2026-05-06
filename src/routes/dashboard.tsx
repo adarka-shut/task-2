@@ -33,18 +33,22 @@ export const Route = createFileRoute("/dashboard")({
 
 type Ev = { id: string; title: string; end_time: string; capacity: number; going: number };
 
-function Row({ e }: { e: Ev }) {
+function Row({ e, isHost }: { e: Ev; isHost: boolean }) {
   return (
     <Card>
       <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <Link to="/events/$id" params={{ id: e.id }} className="font-medium text-foreground hover:underline">{e.title}</Link>
-          <div className="text-xs text-muted-foreground mt-1">Going {e.going} / {e.capacity}</div>
+          {isHost ? (
+            <Link to="/events/$id" params={{ id: e.id }} className="font-medium text-foreground hover:underline">{e.title}</Link>
+          ) : (
+            <span className="font-medium text-foreground">{e.title}</span>
+          )}
+          {isHost && <div className="text-xs text-muted-foreground mt-1">Going {e.going} / {e.capacity}</div>}
         </div>
         <div className="flex gap-2 flex-wrap">
-          <Button size="sm" variant="outline" asChild><Link to="/events/$id/edit" params={{ id: e.id }}>Edit</Link></Button>
+          {isHost && <Button size="sm" variant="outline" asChild><Link to="/events/$id/edit" params={{ id: e.id }}>Edit</Link></Button>}
           <Button size="sm" variant="outline" asChild><Link to="/events/$id/checkin" params={{ id: e.id }}>Check-in</Link></Button>
-          <Button size="sm" variant="outline" onClick={() => exportCsv(e.id, e.title)}>Export CSV</Button>
+          {isHost && <Button size="sm" variant="outline" onClick={() => exportCsv(e.id, e.title)}>Export CSV</Button>}
         </div>
       </CardContent>
     </Card>
