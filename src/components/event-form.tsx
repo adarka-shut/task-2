@@ -201,8 +201,18 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
           </div>
 
           <div className="flex flex-wrap gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={() => save("draft")} disabled={loading}>Save Draft</Button>
-            <Button onClick={() => save("published")} disabled={loading}>Publish</Button>
+            {mode === "edit" ? (
+              <>
+                <Button onClick={() => save("published")} disabled={loading}>Save</Button>
+                <Button variant="outline" onClick={() => save("draft")} disabled={loading}>Unpublish</Button>
+                <Button variant="outline" onClick={duplicate} disabled={loading}>Duplicate</Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" onClick={() => save("draft")} disabled={loading}>Save Draft</Button>
+                <Button onClick={() => save("published")} disabled={loading}>Publish</Button>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
