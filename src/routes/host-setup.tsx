@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { SiteLayout } from "@/components/site-layout";
 import { RequireAuth } from "@/components/require-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
@@ -25,15 +25,39 @@ function HostSetup() {
   const [slug, setSlug] = useState("");
   const [bio, setBio] = useState("");
   const [contactEmail, setContactEmail] = useState(user?.email ?? "");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [slugDirty, setSlugDirty] = useState(false);
   const [loading, setLoading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("File too large (max 5MB)"); return; }
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: false, contentType: file.type, cacheControl: "3600" });
+      if (error) throw error;
+      const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+      setLogoUrl(data.publicUrl);
+      toast.success("Logo uploaded");
+    } catch (err: any) {
+      console.error("Logo upload failed", err);
+      toast.error(`Upload failed: ${err?.message ?? "Unknown error"}`);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setLoading(true);
     const { data: host, error } = await supabase
-      .from("hosts").insert({ name, slug: slug || slugify(name), bio, contact_email: contactEmail }).select().single();
+      .from("hosts").insert({ name, slug: slug || slugify(name), bio, contact_email: contactEmail, logo_url: logoUrl }).select().single();
     if (error || !host) { setLoading(false); return toast.error(error?.message ?? "Failed"); }
     const { error: mErr } = await supabase.from("host_members").insert({ host_id: host.id, user_id: user.id, role: "host" });
     setLoading(false);
@@ -68,12 +92,24 @@ function HostSetup() {
               </div>
               <div>
                 <Label className="mb-1.5 block">Logo</Label>
-                <div className="border-2 border-dashed rounded-lg p-6 text-center text-muted-foreground">
-                  <Upload className="h-6 w-6 mx-auto mb-2" />
-                  <p className="text-sm">Logo upload coming soon</p>
-                </div>
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFile} />
+                {logoUrl ? (
+                  <div className="flex items-center gap-3">
+                    <img src={logoUrl} alt="logo" className="h-20 w-20 rounded-full object-cover border" />
+                    <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                      {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Replace"}
+                    </Button>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => setLogoUrl(null)}>Remove</Button>
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+                    className="w-full border-2 border-dashed rounded-lg p-6 text-center text-muted-foreground hover:bg-muted/30">
+                    {uploading ? <Loader2 className="h-6 w-6 mx-auto mb-2 animate-spin" /> : <Upload className="h-6 w-6 mx-auto mb-2" />}
+                    <p className="text-sm">{uploading ? "Uploading…" : "Click to upload (max 5MB)"}</p>
+                  </button>
+                )}
               </div>
-              <Button type="submit" disabled={loading}>Create host</Button>
+              <Button type="submit" disabled={loading || uploading}>Create host</Button>
             </form>
           </CardContent>
         </Card>
