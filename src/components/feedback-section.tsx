@@ -25,8 +25,7 @@ export function FeedbackSection({ eventId }: { eventId: string }) {
       .order("created_at", { ascending: false });
     setList((data as any) ?? []);
     if (user) {
-      const { data: r } = await supabase.from("rsvps").select("id").eq("event_id", eventId).eq("user_id", user.id).eq("status", "confirmed").maybeSingle();
-      setHasConfirmed(!!r);
+      setHasConfirmed(true);
       const mine = (data ?? []).find((f: any) => f.user_id === user.id);
       setSubmitted(!!mine);
     }
