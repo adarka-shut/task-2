@@ -67,7 +67,7 @@ function Navbar() {
           )}
         </nav>
         <div className="flex items-center gap-2">
-          {isLoggedIn && isHost && (
+          {isLoggedIn && (
             <Button size="sm" asChild className="hidden sm:inline-flex">
               <Link to="/events/new">
                 <Plus className="h-4 w-4 mr-1" /> Create Event
@@ -117,7 +117,7 @@ function Navbar() {
                     {isHost && <Link to="/my-events" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Events</Link>}
                     <Link to="/tickets" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">My Tickets</Link>
                     <Link to="/dashboard" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">{dashboardLabel}</Link>
-                    {isHost && <Link to="/events/new" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Create Event</Link>}
+                    <Link to="/events/new" onClick={() => setOpen(false)} className="py-2 text-sm hover:text-primary">Create Event</Link>
                     <button onClick={() => { setOpen(false); handleLogout(); }} className="py-2 text-sm text-left hover:text-primary">Logout</button>
                   </>
                 ) : (
