@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,10 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { DateTimePicker } from "@/components/date-time-picker";
 
 export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: string }) {
   const { user } = useAuth();
@@ -27,7 +28,10 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
   const [isOnline, setIsOnline] = useState(false);
   const [location, setLocation] = useState("");
   const [capacity, setCapacity] = useState(50);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -51,8 +55,26 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
       setIsOnline(data.is_online);
       setLocation(data.is_online ? (data.online_link ?? "") : (data.venue_address ?? ""));
       setCapacity(data.capacity);
+      setCoverUrl(data.cover_image_url);
     });
   }, [mode, eventId]);
+
+  const onPickFile = () => fileRef.current?.click();
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("File too large (max 5MB)"); return; }
+    setUploading(true);
+    const ext = file.name.split(".").pop() || "jpg";
+    const path = `${user.id}/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("covers").upload(path, file, { upsert: false, contentType: file.type });
+    setUploading(false);
+    if (error) { toast.error(error.message); return; }
+    const { data } = supabase.storage.from("covers").getPublicUrl(path);
+    setCoverUrl(data.publicUrl);
+    toast.success("Cover uploaded");
+  };
 
   const save = async (status: "draft" | "published") => {
     if (!hostId) return toast.error("Create a host profile first");
@@ -65,6 +87,7 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
       timezone, capacity, is_online: isOnline,
       venue_address: isOnline ? null : location,
       online_link: isOnline ? location : null,
+      cover_image_url: coverUrl,
       status,
     };
     const op = mode === "edit" && eventId
@@ -104,10 +127,24 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
           )}
           <div>
             <Label className="mb-1.5 block">Cover image</Label>
-            <div className="border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground hover:bg-muted/30 cursor-pointer">
-              <Upload className="h-6 w-6 mx-auto mb-2" />
-              <p className="text-sm">Click to upload or drag & drop</p>
-            </div>
+            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFile} />
+            {coverUrl ? (
+              <div className="relative">
+                <img src={coverUrl} alt="cover" className="w-full aspect-[2/1] object-cover rounded-lg border" />
+                <div className="mt-2 flex gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={onPickFile} disabled={uploading}>
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Replace"}
+                  </Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setCoverUrl(null)}>Remove</Button>
+                </div>
+              </div>
+            ) : (
+              <button type="button" onClick={onPickFile} disabled={uploading}
+                className="w-full border-2 border-dashed rounded-lg p-8 text-center text-muted-foreground hover:bg-muted/30">
+                {uploading ? <Loader2 className="h-6 w-6 mx-auto mb-2 animate-spin" /> : <Upload className="h-6 w-6 mx-auto mb-2" />}
+                <p className="text-sm">{uploading ? "Uploading…" : "Click to upload (max 5MB)"}</p>
+              </button>
+            )}
           </div>
 
           <div>
@@ -119,8 +156,8 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
             <Textarea id="desc" rows={5} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Tell people what to expect..." />
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div><Label className="mb-1.5 block">Start</Label><Input type="datetime-local" value={start} onChange={(e) => setStart(e.target.value)} /></div>
-            <div><Label className="mb-1.5 block">End</Label><Input type="datetime-local" value={end} onChange={(e) => setEnd(e.target.value)} /></div>
+            <div><Label className="mb-1.5 block">Start</Label><DateTimePicker value={start} onChange={setStart} /></div>
+            <div><Label className="mb-1.5 block">End</Label><DateTimePicker value={end} onChange={setEnd} /></div>
           </div>
           <div>
             <Label className="mb-1.5 block">Timezone</Label>
