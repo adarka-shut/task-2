@@ -68,7 +68,7 @@ export function GallerySection({ eventId, hostId }: { eventId: string; hostId: s
     <Card>
       <CardHeader><CardTitle>Photos</CardTitle></CardHeader>
       <CardContent className="space-y-4">
-        {user && canUpload && (
+        {user && (
           <div>
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFile} />
             <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()} disabled={uploading}>
