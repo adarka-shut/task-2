@@ -46,8 +46,8 @@ function MyEvents() {
                     <div className="text-xs text-muted-foreground mt-0.5">{formatDate(e.start_time)} · {e.hosts?.name}</div>
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    <Button size="sm" variant="outline" asChild><Link to="/events/$id" params={{ id: e.id }}>View</Link></Button>
-                    <Button size="sm" variant="outline" asChild><Link to="/events/$id/edit" params={{ id: e.id }}>Edit</Link></Button>
+                    {isHost && <Button size="sm" variant="outline" asChild><Link to="/events/$id" params={{ id: e.id }}>View</Link></Button>}
+                    {isHost && <Button size="sm" variant="outline" asChild><Link to="/events/$id/edit" params={{ id: e.id }}>Edit</Link></Button>}
                     <Button size="sm" variant="outline" asChild><Link to="/events/$id/checkin" params={{ id: e.id }}>Check-in</Link></Button>
                   </div>
                 </CardContent>
