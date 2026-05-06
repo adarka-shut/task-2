@@ -32,6 +32,7 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
   const [isOnline, setIsOnline] = useState(false);
   const [location, setLocation] = useState("");
   const [capacity, setCapacity] = useState(50);
+  const [visibility, setVisibility] = useState<"public" | "unlisted">("public");
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -59,6 +60,7 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
       setIsOnline(data.is_online);
       setLocation(data.is_online ? (data.online_link ?? "") : (data.venue_address ?? ""));
       setCapacity(data.capacity);
+      setVisibility((data.visibility as "public" | "unlisted") ?? "public");
       setCoverUrl(data.cover_image_url);
     });
   }, [mode, eventId]);
@@ -100,6 +102,7 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
       venue_address: isOnline ? null : location,
       online_link: isOnline ? location : null,
       cover_image_url: coverUrl,
+      visibility,
       status,
     };
     const op = mode === "edit" && eventId
@@ -123,6 +126,7 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
       venue_address: isOnline ? null : location,
       online_link: isOnline ? location : null,
       cover_image_url: coverUrl,
+      visibility,
       status: "draft",
     }).select("id").maybeSingle();
     setLoading(false);
@@ -224,6 +228,17 @@ export function EventForm({ mode, eventId }: { mode: "new" | "edit"; eventId?: s
           <div>
             <Label className="mb-1.5 block">Capacity</Label>
             <Input type="number" value={capacity} onChange={(e) => setCapacity(Number(e.target.value))} />
+          </div>
+
+          <div>
+            <Label className="mb-2 block">Visibility</Label>
+            <div className="inline-flex rounded-md border p-1 gap-1">
+              <Button type="button" size="sm" variant={visibility === "public" ? "default" : "ghost"} onClick={() => setVisibility("public")}>Public</Button>
+              <Button type="button" size="sm" variant={visibility === "unlisted" ? "default" : "ghost"} onClick={() => setVisibility("unlisted")}>Unlisted</Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1.5">
+              {visibility === "public" ? "Listed on Explore and searchable." : "Not on Explore — accessible only via direct link."}
+            </p>
           </div>
 
           <div>
