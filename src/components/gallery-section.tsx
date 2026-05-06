@@ -13,7 +13,6 @@ export function GallerySection({ eventId, hostId }: { eventId: string; hostId: s
   const { user } = useAuth();
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [isHost, setIsHost] = useState(false);
-  const [canUpload, setCanUpload] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -23,8 +22,6 @@ export function GallerySection({ eventId, hostId }: { eventId: string; hostId: s
     if (user) {
       const { data: m } = await supabase.from("host_members").select("id").eq("host_id", hostId).eq("user_id", user.id).maybeSingle();
       setIsHost(!!m);
-      const { data: r } = await supabase.from("rsvps").select("id").eq("event_id", eventId).eq("user_id", user.id).eq("status", "confirmed").maybeSingle();
-      setCanUpload(!!r);
     }
   };
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [eventId, user?.id]);
