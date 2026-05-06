@@ -133,12 +133,12 @@ function Navbar() {
 
 function Footer() {
   return (
-    <footer className="border-t mt-16">
-      <div className="container mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+    <footer className="border-t border-secondary/40 mt-16 bg-secondary text-secondary-foreground">
+      <div className="container mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
         <p>© 2025 EventPass</p>
         <div className="flex gap-6">
-          <Link to="/explore" className="hover:text-foreground">Explore</Link>
-          <Link to="/about" className="hover:text-foreground">About</Link>
+          <Link to="/explore" className="hover:text-primary">Explore</Link>
+          <Link to="/about" className="hover:text-primary">About</Link>
         </div>
       </div>
     </footer>
