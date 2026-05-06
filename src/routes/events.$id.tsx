@@ -146,7 +146,7 @@ function EventPage() {
                   <Link to="/hosts/$id" params={{ id: host.id }} className="flex items-center gap-3 group">
                     <img src={host.logo_url || `https://placehold.co/120x120?text=${encodeURIComponent(host.name.charAt(0))}`} alt={host.name} className="h-12 w-12 rounded-full" />
                     <div>
-                      <div className="font-medium group-hover:text-primary">{host.name}</div>
+                      <div className="font-medium text-foreground group-hover:underline">{host.name}</div>
                       <div className="text-xs text-muted-foreground line-clamp-2">{host.bio}</div>
                     </div>
                   </Link>
